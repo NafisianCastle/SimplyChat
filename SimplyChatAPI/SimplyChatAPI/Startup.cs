@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SimplyChatAPI.Data;
 using Microsoft.Extensions.Configuration;
+using SimplyChatAPI.Hubs;
 
 namespace SimplyChatAPI
 {
@@ -33,6 +34,8 @@ namespace SimplyChatAPI
             });
             services.AddControllers();
             services.AddAuthentication();
+            services.AddAuthorization();
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -45,13 +48,17 @@ namespace SimplyChatAPI
             }
 
             app.UseRouting();
-
+            app.UseAuthentication();
+            app.UseAuthorization();
+           
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGet("/", async context =>
                 {
                     await context.Response.WriteAsync("Hello World!");
                 });
+
+                endpoints.MapHub<ChatHub>("/Chat");
             });
         }
     }
