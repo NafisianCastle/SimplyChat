@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using SimplyChatAPI.Data;
 using Microsoft.Extensions.Configuration;
@@ -33,7 +34,15 @@ namespace SimplyChatAPI
                 options.UseSqlServer(Configuration.GetConnectionString("sqlConnection"));
             });
             services.AddControllers();
-            services.AddAuthentication();
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.Events.OnRedirectToLogin = (context) =>
+                    {
+                        context.Response.StatusCode = 401;
+                        return Task.CompletedTask;
+                    };
+                });            
             services.AddAuthorization();
             services.AddSignalR();
         }
@@ -50,13 +59,15 @@ namespace SimplyChatAPI
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-           
+            var cookiePolicyOptions = new CookiePolicyOptions
+            {
+                MinimumSameSitePolicy = SameSiteMode.Strict,
+            };
+            app.UseCookiePolicy(cookiePolicyOptions);
+
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("Hello World!");
-                });
+                endpoints.MapDefaultControllerRoute();
 
                 endpoints.MapHub<ChatHub>("/Chat");
             });
