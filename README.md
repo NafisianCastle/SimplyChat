@@ -58,7 +58,8 @@ This section should list any major frameworks/libraries used to bootstrap your p
 
 * [![React][React.js]][React-url]
 * [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-* [![ASP.NET Core][github.com/dotnet/aspnetcore]][ASP.NET-url]
+* ASP.NET Core
+* Swagger
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
@@ -72,6 +73,10 @@ To get a local copy up and running follow these simple example steps.
 ### Prerequisites
 
 This is an example of how to list things you need to use the software and how to install them.
+* Visual Studio
+* Sql Server Management Studio
+* Postman
+* Visual Studio Code
 * npm
   ```sh
   npm install npm@latest -g
