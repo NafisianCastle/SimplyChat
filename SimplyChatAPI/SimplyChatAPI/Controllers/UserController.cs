@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -27,10 +28,10 @@ namespace SimplyChatAPI.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ILogger<UserController> _logger;
 
-        public UserController(ILogger<UserController> logger)
+        public UserController(ILogger<UserController> logger,ApplicationDbContext context)
         {
-
             _logger = logger;
+            _context = context;
 
         }
         // GET: api/Allusers
@@ -43,13 +44,14 @@ namespace SimplyChatAPI.Controllers
 
 
         [HttpPost("register")]
-        public async Task<ActionResult> Register(RegisterDTO register)
+        public async Task<IActionResult> Register(RegisterDTO register)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                var isExist = _context.Users.FirstOrDefault(x => x.Email == register.Email);
-                if (isExist != null)
+               
+                var isExist = await _context.Users.FirstOrDefaultAsync(x => x.Email == register.Email);
+                if (isExist == null)
                 {
                     var user = new User
                     {
@@ -58,12 +60,12 @@ namespace SimplyChatAPI.Controllers
                         Email = register.Email
                     };
                     var result = await _context.Users.AddAsync(user);
-                    return result != null ? Accepted() : (ActionResult)BadRequest(ModelState);
+                    return result != null ? Accepted() : (ActionResult) BadRequest(ModelState);
 
                 }
                 else
                 {
-                    return BadRequest();
+                    return BadRequest("Email already exists!");
                 }
             }
             catch (Exception ex)
@@ -71,9 +73,7 @@ namespace SimplyChatAPI.Controllers
                 _logger.LogError(ex, $"Something went wrong in the {nameof(Register)}");
                 return StatusCode(500, "Internal server error. Please try again later");
             }
-
-
-
+            
         }
 
 
@@ -83,7 +83,7 @@ namespace SimplyChatAPI.Controllers
             var user = _context.Users.FirstOrDefault(x => x.Email == signInRequest.Email);
             if (user is null)
             {
-                return BadRequest();
+                return BadRequest("User doesn't exist!");
             }
 
             var claims = new List<Claim>

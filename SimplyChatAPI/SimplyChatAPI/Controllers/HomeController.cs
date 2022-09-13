@@ -1,5 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
+using SimplyChatAPI.Data;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -9,19 +13,16 @@ namespace SimplyChatAPI.Controllers
     [ApiController]
     public class HomeController : ControllerBase
     {
+
+        private readonly  ApplicationDbContext _context;
         // GET: api/<HomeController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        [HttpGet("index")]
+        public async Task<ActionResult> Get()
         {
-            return new string[] { "value1", "value2" };
+            return Ok(await _context.Messages.ToListAsync());
         }
 
-        // GET api/<HomeController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
+        
 
         // POST api/<HomeController>
         [HttpPost]
